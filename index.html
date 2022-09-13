@@ -13,8 +13,9 @@
     <h2>GitHub Search</h2>
 
     <form id='github-form'>
-      <input id='search' type='text' name='search'>
-      <input type='submit' name='submit'/>
+      <input id='search' type='text' name='search' >
+      <input type='submit' name='submit'  />
+      
     </form>
 
     <div id='github-container'>
@@ -28,6 +29,74 @@
     </div>
 
   </div>
+<script>
+  function myFunction(li) {
+    var user = li.id;
+    fetch(`https://api.github.com/users/${user}/repos`, {
+      method: "GET",
+      headers: {
+      "Content-Type": "application/json",
+      Accept: "application/vnd.github.v3+json"
+      }
+    })
+    .then(response => response.json())
+    .then(function(data) {
+      const ul = document.createElement('ul');
+      const container = document.getElementById(user);
+      function insertAfter(newNode, existingNode) {
+          existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+        }
+        insertAfter(ul, container)
+        
+      for(repo of data) {
+        const li = document.createElement('li')
+        li.textContent = repo.name;
+        ul.appendChild(li);
+      }
 
+    })}
+    const inputForm = document.querySelector('form');
+  inputForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const input = document.querySelector('input#search').value;
+  searchFunction(input);
+})
+
+
+function searchFunction(userInput) {
+
+      fetch(`https://api.github.com/search/users?q=${userInput}`, {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+              Accept: "application/vnd.github.v3+json"
+          },
+      })
+      .then(response => response.json())
+      .then(function(data) {
+          const listOfUsers = data.items;
+  
+          for(user of listOfUsers) {
+              const DOMuserList = document.querySelector('#user-list');
+              const picDiv = document.createElement('div');
+              picDiv.className = "pic_div";
+  
+              picDiv.innerHTML = `
+              <img src=${user.avatar_url} id=${user.login} onclick=myFunction(${user.login})>
+              <p class=user_name> Login:  ${user.login} </p>
+              <a href=${user.html_url}> Link to profile </a>
+              `
+              DOMuserList.append(picDiv);
+  
+          }})
+  }
+
+  
+   
+
+      
+    
+  
+</script>
 </body>
 </html>
